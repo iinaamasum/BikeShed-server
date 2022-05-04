@@ -24,17 +24,33 @@ async function run() {
 
   const productsCollection = client.db('warehouse').collection('products');
 
-  /**
-   * getting all products
-   * link-local: http://localhost:5000/products
-   * link-online:
-   */
-  app.get('/products', async (req, res) => {
-    const query = {};
-    const cursor = await productsCollection.find({}).toArray();
-    console.log(cursor);
-    res.send(cursor);
-  });
+  try {
+    /**
+     * getting all products
+     * link-local: http://localhost:5000/products
+     * link-online:
+     */
+    app.get('/products', async (req, res) => {
+      const query = {};
+      const cursor = await productsCollection.find(query).toArray();
+      // console.log(cursor);
+      res.send(cursor);
+    });
+
+    /**
+     * post data
+     * link-local:
+     * link-online:
+     */
+
+    app.post('/product', async (req, res) => {
+      const product = req.body;
+      const result = await productsCollection.insertOne(product);
+      console.log(`A document was inserted with the _id: ${result.insertedId}`);
+      res.send({ Post: 'post successfully' });
+    });
+  } finally {
+  }
 }
 
 run().catch(console.dir);
