@@ -53,13 +53,40 @@ async function run() {
 
     /**
      * deleting single data
-     * link-local: http://localhost:5000/product/${id}\
+     * link-local: http://localhost:5000/product/${id}
      * link-online:
      */
     app.delete('/product/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await productsCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    /**
+     * update a existing product
+     * link-local: http://localhost:5000/product/${id}
+     * link-online:
+     */
+    app.put('/product/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedData = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+
+      console.log(id);
+      console.log(updatedData);
+
+      const newData = {
+        $set: updatedData,
+      };
+
+      const result = await productsCollection.updateOne(
+        filter,
+        newData,
+        options
+      );
+
       res.send(result);
     });
 
