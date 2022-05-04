@@ -39,7 +39,7 @@ async function run() {
 
     /**
      * finding single data
-     * link-local: http://localhost:5000/product
+     * link-local: http://localhost:5000/product/${id}
      * link-online:
      */
     app.get('/product/:id', async (req, res) => {
@@ -49,6 +49,18 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const product = await productsCollection.findOne(query);
       res.send(product);
+    });
+
+    /**
+     * deleting single data
+     * link-local: http://localhost:5000/product/${id}\
+     * link-online:
+     */
+    app.delete('/product/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productsCollection.deleteOne(query);
+      res.send(result);
     });
 
     /**
