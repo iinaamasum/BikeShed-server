@@ -2,7 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 
 /**
@@ -38,12 +38,26 @@ async function run() {
     });
 
     /**
+     * finding single data
+     * link-local: http://localhost:5000/product
+     * link-online:
+     */
+    app.get('/product/:id', async (req, res) => {
+      const id = req.params.id;
+
+      console.log(id);
+      const query = { _id: ObjectId(id) };
+      const product = await productsCollection.findOne(query);
+      res.send(product);
+    });
+
+    /**
      * post data
-     * link-local:
+     * link-local: http://localhost:5000/productUp
      * link-online:
      */
 
-    app.post('/product', async (req, res) => {
+    app.post('/productUp', async (req, res) => {
       const product = req.body;
       const result = await productsCollection.insertOne(product);
       console.log(`A document was inserted with the _id: ${result.insertedId}`);
