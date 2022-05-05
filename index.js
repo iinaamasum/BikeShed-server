@@ -4,6 +4,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
+const req = require('express/lib/request');
 
 /**
  * middleware
@@ -130,17 +131,47 @@ async function run() {
      * getting user separated item by id
      * link-local: http://localhost:5000/item/id
      */
-    app.get('item/:id', async (req, res) => {
+    app.get('/item/:id', async (req, res) => {
       const id = req.params.id;
+      // console.log(id);
       const query = { _id: ObjectId(id) };
       const item = await UsersCollection.findOne(query);
       res.send(item);
     });
 
+    /**
+     * deleting user specific item
+     * link-local: http://localhost:5000/item/id
+     */
+
     app.delete('/item/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await UsersCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    /**
+     * updating user specific item
+     * link-local: http://localhost:5000/item/id
+     */
+
+    app.put('/item/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const data = req.body;
+      const options = { upsert: true };
+
+      const updatedData = {
+        $set: data,
+      };
+      console.log(data, query, updatedData);
+
+      const result = await UsersCollection.updateOne(
+        query,
+        updatedData,
+        options
+      );
       res.send(result);
     });
   } finally {
