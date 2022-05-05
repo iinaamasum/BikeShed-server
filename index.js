@@ -113,6 +113,18 @@ async function run() {
       const result = await UsersCollection.insertOne(item);
       res.send(result);
     });
+
+    /**
+     * getting all data from usersCollection
+     * link-local: http://localhost:5000/items?email='email'
+     *
+     */
+    app.get('/items', async (req, res) => {
+      const query = { email: req.query.email };
+      const data = await UsersCollection.find(query).toArray();
+      console.log(query);
+      res.send(data);
+    });
   } finally {
   }
 }
