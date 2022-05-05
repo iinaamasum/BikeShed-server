@@ -23,6 +23,7 @@ async function run() {
   console.log('db running');
 
   const productsCollection = client.db('warehouse').collection('products');
+  const UsersCollection = client.db('warehouse').collection('items');
 
   try {
     /**
@@ -45,7 +46,7 @@ async function run() {
     app.get('/product/:id', async (req, res) => {
       const id = req.params.id;
 
-      console.log(id);
+      // console.log(id);
       const query = { _id: ObjectId(id) };
       const product = await productsCollection.findOne(query);
       res.send(product);
@@ -74,8 +75,8 @@ async function run() {
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
 
-      console.log(id);
-      console.log(updatedData);
+      // console.log(id);
+      // console.log(updatedData);
 
       const newData = {
         $set: updatedData,
@@ -99,8 +100,18 @@ async function run() {
     app.post('/productUp', async (req, res) => {
       const product = req.body;
       const result = await productsCollection.insertOne(product);
-      console.log(`A document was inserted with the _id: ${result.insertedId}`);
+      // console.log(`A document was inserted with the _id: ${result.insertedId}`);
       res.send({ Post: 'post successfully' });
+    });
+
+    /**
+     * post separate user data
+     * link-local: http://localhost:5000/item
+     */
+    app.post('/item', async (req, res) => {
+      const item = req.body;
+      const result = await UsersCollection.insertOne(item);
+      res.send(result);
     });
   } finally {
   }
