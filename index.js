@@ -122,8 +122,19 @@ async function run() {
     app.get('/items', async (req, res) => {
       const query = { email: req.query.email };
       const data = await UsersCollection.find(query).toArray();
-      console.log(query);
+      // console.log(query);
       res.send(data);
+    });
+
+    /**
+     * getting user separated item by id
+     * link-local: http://localhost:5000/item/id
+     */
+    app.get('item/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const item = await UsersCollection.findOne(query);
+      res.send(item);
     });
   } finally {
   }
