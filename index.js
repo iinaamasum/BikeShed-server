@@ -35,11 +35,34 @@ async function run() {
     app.post('/login', async (req, res) => {
       const loggedUser = req.body;
       const token = jwt.sign(loggedUser, process.env.ACCESS_TOKEN_KEY, {
-        expiresIn: '10d',
+        expiresIn: '10h',
       });
 
       res.send({ token });
     });
+
+    /**
+     * verifyToken function section
+     */
+    const verifyToken = (req, res, next) => {
+      const author = req.headers.author;
+      if (!author) {
+        return res
+          .status(401)
+          .send({ name: 'NoToken', message: 'Unauthorized Access' });
+      }
+      const token = author.split(' ')[1];
+      console.log(token);
+      jwt.verify(token, process.env.ACCESS_TOKEN_KEY, (error, decoded) => {
+        if (error) {
+          return res
+            .status(403)
+            .send({ name: 'WrongToken', message: 'Forbidden Access' });
+        }
+        req.decoded = decoded;
+      });
+      next();
+    };
 
     /**
      * getting all products
@@ -134,7 +157,9 @@ async function run() {
      * link-local: http://localhost:5000/items?email='email'
      *
      */
-    app.get('/items', async (req, res) => {
+    app.get('/items', verifyToken, async (req, res) => {
+      const decodedEmail = req.decoded.email;
+      console.log(decodedEmail);
       const query = { email: req.query.email };
       const data = await productsCollection.find(query).toArray();
       // console.log(query);
