@@ -1,10 +1,12 @@
 const express = require('express');
 require('dotenv').config();
+var jwt = require('jsonwebtoken');
 const app = express();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 const req = require('express/lib/request');
+const res = require('express/lib/response');
 
 /**
  * middleware
@@ -24,9 +26,21 @@ async function run() {
   console.log('db running');
 
   const productsCollection = client.db('warehouse').collection('products');
-  const UsersCollection = client.db('warehouse').collection('items');
 
   try {
+    /**
+     * JWT token post api
+     * link-local: http://localhost:5000/login
+     */
+    app.post('/login', async (req, res) => {
+      const loggedUser = req.body;
+      const token = jwt.sign(loggedUser, process.env.ACCESS_TOKEN_KEY, {
+        expiresIn: '10d',
+      });
+
+      res.send({ token });
+    });
+
     /**
      * getting all products
      * link-local: http://localhost:5000/products
@@ -111,18 +125,18 @@ async function run() {
      */
     app.post('/item', async (req, res) => {
       const item = req.body;
-      const result = await UsersCollection.insertOne(item);
+      const result = await productsCollection.insertOne(item);
       res.send(result);
     });
 
     /**
-     * getting all data from usersCollection
+     * getting all data from productsCollection
      * link-local: http://localhost:5000/items?email='email'
      *
      */
     app.get('/items', async (req, res) => {
       const query = { email: req.query.email };
-      const data = await UsersCollection.find(query).toArray();
+      const data = await productsCollection.find(query).toArray();
       // console.log(query);
       res.send(data);
     });
@@ -135,7 +149,7 @@ async function run() {
       const id = req.params.id;
       // console.log(id);
       const query = { _id: ObjectId(id) };
-      const item = await UsersCollection.findOne(query);
+      const item = await productsCollection.findOne(query);
       res.send(item);
     });
 
@@ -147,7 +161,7 @@ async function run() {
     app.delete('/item/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
-      const result = await UsersCollection.deleteOne(query);
+      const result = await productsCollection.deleteOne(query);
       res.send(result);
     });
 
@@ -165,9 +179,9 @@ async function run() {
       const updatedData = {
         $set: data,
       };
-      console.log(data, query, updatedData);
+      // console.log(data, query, updatedData);
 
-      const result = await UsersCollection.updateOne(
+      const result = await productsCollection.updateOne(
         query,
         updatedData,
         options
