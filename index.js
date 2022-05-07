@@ -52,7 +52,7 @@ async function run() {
           .send({ name: 'NoToken', message: 'Unauthorized Access' });
       }
       const token = author.split(' ')[1];
-      console.log(token);
+      //console.log(token);
       jwt.verify(token, process.env.ACCESS_TOKEN_KEY, (error, decoded) => {
         if (error) {
           return res
@@ -60,8 +60,8 @@ async function run() {
             .send({ name: 'WrongToken', message: 'Forbidden Access' });
         }
         req.decoded = decoded;
+        next();
       });
-      next();
     };
 
     /**
@@ -139,7 +139,7 @@ async function run() {
       const product = req.body;
       const result = await productsCollection.insertOne(product);
       // console.log(`A document was inserted with the _id: ${result.insertedId}`);
-      res.send({ Post: 'post successfully' });
+      res.send(result);
     });
 
     /**
@@ -159,11 +159,17 @@ async function run() {
      */
     app.get('/items', verifyToken, async (req, res) => {
       const decodedEmail = req.decoded.email;
-      console.log(decodedEmail);
-      const query = { email: req.query.email };
-      const data = await productsCollection.find(query).toArray();
-      // console.log(query);
-      res.send(data);
+      // console.log(decodedEmail);
+      if (req.query.email === decodedEmail) {
+        const query = { email: req.query.email };
+        const data = await productsCollection.find(query).toArray();
+        // console.log(query);
+        res.send(data);
+      } else {
+        res
+          .status(403)
+          .send({ name: 'WrongToken', message: 'Forbidden Access' });
+      }
     });
 
     /**
